@@ -1,149 +1,142 @@
-import React from "react";
+import { Bell, Settings, BarChart2, Home } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 import { Button } from "./ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import { Bell, ChevronDown, LineChart, Settings } from "lucide-react";
-import {
-  TooltipProvider,
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "./ui/tooltip";
+import { Logo } from "./ui/logo";
+import { useAuthStore } from "@/lib/auth";
 
-interface NavigationBarProps {
-  userName?: string;
-  userAvatar?: string;
-  subscriptionStatus?: "free" | "pro" | "enterprise";
-  unreadNotifications?: number;
-  onSettingsClick?: () => void;
-  onAnalyticsClick?: () => void;
-  onProfileClick?: () => void;
-  onNotificationsClick?: () => void;
-}
+const NavigationBar = () => {
+  const location = useLocation();
+  const { signOut } = useAuthStore();
 
-const NavigationBar = ({
-  userName = "John Doe",
-  userAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
-  subscriptionStatus = "pro",
-  unreadNotifications = 3,
-  onSettingsClick = () => {},
-  onAnalyticsClick = () => {},
-  onProfileClick = () => {},
-  onNotificationsClick = () => {},
-}: NavigationBarProps) => {
+  const isActive = (path: string) => location.pathname.includes(path);
+
+  const navItemVariants = {
+    hidden: { opacity: 0, y: -20 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.1,
+        duration: 0.5,
+        type: "spring",
+        stiffness: 300,
+      },
+    }),
+  };
+
   return (
-    <nav className="w-full h-16 px-4 bg-white border-b border-gray-200 flex items-center justify-between">
-      <div className="flex items-center space-x-4">
-        <h1 className="text-xl font-bold">Caption Generator</h1>
-        <span className="px-2 py-1 text-xs font-medium bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-full">
-          {subscriptionStatus.toUpperCase()}
-        </span>
-      </div>
+    <motion.nav
+      className="border-b bg-white/75 backdrop-blur-sm sticky top-0 z-50 shadow-sm shadow-violet-100/20"
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+    >
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="flex items-center space-x-8">
+          <Link to="/dashboard">
+            <Logo />
+          </Link>
+          <div className="hidden md:flex items-center space-x-4">
+            <motion.div
+              custom={0}
+              variants={navItemVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              <Link to="/dashboard">
+                <Button
+                  variant={isActive("/dashboard") ? "default" : "ghost"}
+                  size="sm"
+                  className={`space-x-2 ${isActive("/dashboard") ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white" : "hover:bg-violet-50"}`}
+                >
+                  <Home className="h-4 w-4" />
+                  <span>Dashboard</span>
+                </Button>
+              </Link>
+            </motion.div>
 
-      <div className="flex items-center space-x-4">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onAnalyticsClick}
-                className="relative"
-              >
-                <LineChart className="h-5 w-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Analytics Overview</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+            <motion.div
+              custom={1}
+              variants={navItemVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              <Link to="/dashboard/analytics">
+                <Button
+                  variant={isActive("/analytics") ? "default" : "ghost"}
+                  size="sm"
+                  className={`space-x-2 ${isActive("/analytics") ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white" : "hover:bg-violet-50"}`}
+                >
+                  <BarChart2 className="h-4 w-4" />
+                  <span>Analytics</span>
+                </Button>
+              </Link>
+            </motion.div>
+          </div>
+        </div>
 
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
+        <div className="flex items-center space-x-4">
+          <motion.div
+            custom={2}
+            variants={navItemVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <Link to="/dashboard/notifications">
               <Button
-                variant="ghost"
+                variant={isActive("/notifications") ? "default" : "ghost"}
                 size="icon"
-                onClick={onNotificationsClick}
-                className="relative"
+                className={
+                  isActive("/notifications")
+                    ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white"
+                    : "hover:bg-violet-50"
+                }
               >
                 <Bell className="h-5 w-5" />
-                {unreadNotifications > 0 && (
-                  <span className="absolute -top-1 -right-1 h-4 w-4 text-xs flex items-center justify-center bg-red-500 text-white rounded-full">
-                    {unreadNotifications}
-                  </span>
-                )}
               </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Notifications</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+            </Link>
+          </motion.div>
 
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
+          <motion.div
+            custom={3}
+            variants={navItemVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <Link to="/dashboard/settings">
               <Button
-                variant="ghost"
+                variant={isActive("/settings") ? "default" : "ghost"}
                 size="icon"
-                onClick={onSettingsClick}
-                className="relative"
+                className={
+                  isActive("/settings")
+                    ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white"
+                    : "hover:bg-violet-50"
+                }
               >
                 <Settings className="h-5 w-5" />
               </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Settings</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+            </Link>
+          </motion.div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <motion.div
+            custom={4}
+            variants={navItemVariants}
+            initial="hidden"
+            animate="visible"
+          >
             <Button
-              variant="ghost"
-              className="flex items-center space-x-2 hover:bg-gray-100"
+              variant="outline"
+              size="sm"
+              onClick={() => signOut()}
+              className="border-violet-200 hover:bg-violet-50 text-violet-700"
             >
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={userAvatar} alt={userName} />
-                <AvatarFallback>
-                  {userName
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
-                </AvatarFallback>
-              </Avatar>
-              <span className="font-medium">{userName}</span>
-              <ChevronDown className="h-4 w-4" />
+              Sign Out
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onProfileClick}>
-              Profile
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onSettingsClick}>
-              Settings
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onAnalyticsClick}>
-              Analytics
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Log out</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          </motion.div>
+        </div>
       </div>
-    </nav>
+    </motion.nav>
   );
 };
 

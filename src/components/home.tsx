@@ -1,9 +1,20 @@
 import React from "react";
-import NavigationBar from "./NavigationBar";
 import CaptionGenerator from "./CaptionGenerator";
 import HistorySidebar from "./HistorySidebar";
+import { useToast } from "@/components/ui/use-toast";
+import { useCaptionStore } from "@/lib/store";
+import { useProfileStore } from "@/lib/profileSettings";
+import DashboardLayout from "./DashboardLayout";
 
 const Home = () => {
+  const { toast } = useToast();
+  const { deleteSavedCaption, savedCaptions } = useCaptionStore();
+  const { initialize: initializeProfile } = useProfileStore();
+
+  React.useEffect(() => {
+    initializeProfile();
+  }, [initializeProfile]);
+
   const handleGenerate = (data: {
     keywords: string;
     image?: File;
@@ -16,21 +27,34 @@ const Home = () => {
   };
 
   const handleSchedule = (id: string, date: Date) => {
-    console.log("Scheduling caption", id, "for", date);
+    toast({
+      title: "Caption Scheduled",
+      description: `Your caption has been scheduled for ${date.toLocaleDateString()}`,
+    });
   };
 
   const handleDelete = (id: string) => {
-    console.log("Deleting caption", id);
+    deleteSavedCaption(id);
+    toast({
+      title: "Caption Deleted",
+      description: "Your caption has been removed from saved items",
+    });
   };
 
   const handleShare = (id: string) => {
-    console.log("Sharing caption", id);
+    const caption = savedCaptions.find((c) => c.id === id);
+    if (caption) {
+      navigator.clipboard.writeText(caption.text);
+      toast({
+        title: "Caption Copied",
+        description: "Your caption has been copied to clipboard for sharing",
+      });
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <NavigationBar />
-      <div className="container mx-auto py-6 px-4 flex gap-6">
+    <DashboardLayout>
+      <div className="flex gap-6">
         <div className="flex-1">
           <CaptionGenerator onGenerate={handleGenerate} />
         </div>
@@ -40,7 +64,7 @@ const Home = () => {
           onShare={handleShare}
         />
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 
