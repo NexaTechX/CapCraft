@@ -15,7 +15,7 @@ interface GenerateParams {
 }
 
 export async function generateSocialCaptions(params: GenerateParams) {
-  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+  const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
 
   const prompt = `You are a professional social media caption writer. Generate 3 creative and engaging Instagram captions.
 

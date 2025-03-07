@@ -11,7 +11,7 @@ export async function generateHashtags(
       return [];
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
 
     const prompt = `Generate ${count} relevant and trending hashtags for the following social media caption. 
     Return ONLY a comma-separated list of hashtags (including the # symbol), with no additional text or explanation.

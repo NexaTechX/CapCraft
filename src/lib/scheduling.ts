@@ -32,19 +32,23 @@ export async function schedulePost(
 export async function getScheduledPosts(
   userId: string,
 ): Promise<ScheduledPost[]> {
-  const { data, error } = await supabase
-    .from("scheduled_posts")
-    .select(
-      `
-      *,
-      saved_captions!inner (*)
-    `,
-    )
-    .eq("saved_captions.user_id", userId)
-    .order("scheduled_time", { ascending: true });
+  try {
+    const { data, error } = await supabase
+      .from("scheduled_posts")
+      .select(
+        `
+        *,
+        saved_captions (*)
+      `,
+      )
+      .order("scheduled_time", { ascending: true });
 
-  if (error) throw error;
-  return data;
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching scheduled posts:", error);
+    return [];
+  }
 }
 
 export async function cancelScheduledPost(postId: string) {

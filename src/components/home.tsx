@@ -1,19 +1,39 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import CaptionGenerator from "./CaptionGenerator";
 import HistorySidebar from "./HistorySidebar";
 import { useToast } from "@/components/ui/use-toast";
 import { useCaptionStore } from "@/lib/store";
 import { useProfileStore } from "@/lib/profileSettings";
 import DashboardLayout from "./DashboardLayout";
+import LoadingSpinner from "./LoadingSpinner";
+import { ensureTablesExist } from "@/lib/db";
 
 const Home = () => {
   const { toast } = useToast();
-  const { deleteSavedCaption, savedCaptions } = useCaptionStore();
+  const { deleteSavedCaption, savedCaptions, loadSavedCaptions } =
+    useCaptionStore();
   const { initialize: initializeProfile } = useProfileStore();
+  const [loading, setLoading] = useState(true);
 
-  React.useEffect(() => {
-    initializeProfile();
-  }, [initializeProfile]);
+  useEffect(() => {
+    const init = async () => {
+      setLoading(true);
+      try {
+        // Ensure database tables exist
+        await ensureTablesExist();
+        // Initialize profile settings
+        await initializeProfile();
+        // Load saved captions
+        await loadSavedCaptions();
+      } catch (error) {
+        console.error("Error initializing dashboard:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    init();
+  }, [initializeProfile, loadSavedCaptions]);
 
   const handleGenerate = (data: {
     keywords: string;
@@ -51,6 +71,16 @@ const Home = () => {
       });
     }
   };
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-[80vh]">
+          <LoadingSpinner size="lg" text="Loading your dashboard..." />
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>

@@ -15,7 +15,7 @@ export async function analyzeImage(file: File): Promise<string> {
       throw new Error("Image size should be less than 4MB");
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro-vision" });
 
     // Convert File to base64
     const fileBuffer = await file.arrayBuffer();

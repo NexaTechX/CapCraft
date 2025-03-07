@@ -96,7 +96,7 @@ function App() {
           element={<InstagramCallback />}
         />
         {import.meta.env.VITE_TEMPO === "true" && (
-          <Route path="/tempobook/*" element={useRoutes(routes)} />
+          <Route path="/tempobook/*" element={null} />
         )}
       </Routes>
       <Toaster />
