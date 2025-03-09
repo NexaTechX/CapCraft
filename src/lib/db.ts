@@ -35,6 +35,7 @@ export async function ensureTablesExist() {
 
     // If settings don't exist, create them
     if (settingsError && settingsError.code === "PGRST116") {
+      // Create profile settings with correct field names
       await supabase.from("profile_settings").insert({
         user_id: user.id,
         name: user.email?.split("@")[0] || "User",
@@ -43,7 +44,6 @@ export async function ensureTablesExist() {
         default_language: "en",
         preferred_hashtags: [],
         emoji_style: "moderate",
-        display_name: user.email?.split("@")[0] || "User",
       });
     }
 

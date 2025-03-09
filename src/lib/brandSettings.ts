@@ -38,11 +38,20 @@ export const useBrandStore = create<BrandStore>((set, get) => ({
       } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const { error } = await supabase.from("brand_settings").upsert({
+      // Convert camelCase to snake_case for database fields
+      const dbSettings: any = {
         user_id: user.id,
-        ...get().settings,
-        ...newSettings,
-      });
+        name: newSettings.name,
+        default_tone: newSettings.defaultTone,
+        default_language: newSettings.defaultLanguage,
+        preferred_hashtags: newSettings.preferredHashtags,
+        emoji_style: newSettings.emojiStyle,
+        updated_at: new Date().toISOString(),
+      };
+
+      const { error } = await supabase
+        .from("brand_settings")
+        .upsert(dbSettings);
 
       if (error) throw error;
 

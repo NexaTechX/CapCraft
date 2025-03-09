@@ -50,19 +50,42 @@ const Analytics = () => {
       setLoading(true);
 
       try {
-        // Load all data in parallel
-        const [summary, engagement, platforms, contentTypes] =
-          await Promise.all([
-            getAnalyticsSummary(user.id),
-            getEngagementOverTime(user.id),
-            getPlatformPerformance(user.id),
-            getContentTypePerformance(user.id),
-          ]);
+        // Load data one by one with fallbacks to prevent complete failure
+        try {
+          const summary = await getAnalyticsSummary(user.id);
+          setAnalytics(summary);
+        } catch (error) {
+          console.error("Error loading analytics summary:", error);
+          setAnalytics({
+            totalPosts: 0,
+            averageEngagement: 0,
+            topPerformingPosts: [],
+          });
+        }
 
-        setAnalytics(summary);
-        setEngagementData(engagement);
-        setPlatformData(platforms);
-        setContentTypeData(contentTypes);
+        try {
+          const engagement = await getEngagementOverTime(user.id);
+          setEngagementData(engagement);
+        } catch (error) {
+          console.error("Error loading engagement data:", error);
+          setEngagementData([]);
+        }
+
+        try {
+          const platforms = await getPlatformPerformance(user.id);
+          setPlatformData(platforms);
+        } catch (error) {
+          console.error("Error loading platform data:", error);
+          setPlatformData([]);
+        }
+
+        try {
+          const contentTypes = await getContentTypePerformance(user.id);
+          setContentTypeData(contentTypes);
+        } catch (error) {
+          console.error("Error loading content type data:", error);
+          setContentTypeData([]);
+        }
       } catch (error) {
         console.error("Error loading analytics data:", error);
         toast({
@@ -81,10 +104,10 @@ const Analytics = () => {
   return (
     <DashboardLayout>
       {loading ? (
-        <div className="flex items-center justify-center h-64">
+        <div className="flex items-center justify-center h-[80vh]">
           <LoadingSpinner size="lg" text="Loading analytics data..." />
         </div>
-      ) : (
+      ) : analytics ? (
         <div>
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold">Analytics Dashboard</h1>
@@ -432,6 +455,25 @@ const Analytics = () => {
               </div>
             </Card>
           </TabsContent>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center h-[60vh] text-center">
+          <div className="bg-violet-50 p-8 rounded-lg shadow-sm border border-violet-100 max-w-md">
+            <Activity className="h-12 w-12 text-violet-400 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-violet-800 mb-2">
+              No Analytics Data Available
+            </h2>
+            <p className="text-violet-600 mb-4">
+              Start creating and scheduling posts to see your analytics data
+              here.
+            </p>
+            <Button
+              onClick={() => (window.location.href = "/dashboard")}
+              className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
+            >
+              Go to Dashboard
+            </Button>
+          </div>
         </div>
       )}
     </DashboardLayout>
